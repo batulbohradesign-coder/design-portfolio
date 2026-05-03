@@ -945,23 +945,19 @@
       .then(function(res){ return res.json().then(function(data){ return {ok: res.ok, data: data}; }); })
       .then(function(result){
         if(result.ok){
-          btn.textContent = 'send message →';
-          btn.disabled = false;
-          btn.style.opacity = '1';
-          /* Show small confirmation line below the button */
-          var existing = document.getElementById('modalConfirm');
-          if(!existing){
-            var confirm = document.createElement('p');
-            confirm.id = 'modalConfirm';
-            confirm.textContent = 'message sent! i\'ll get back to you soon ✉️';
-            confirm.style.cssText = 'font-size:14px;color:var(--accent);margin-top:12px;text-align:center;opacity:0;transition:opacity 400ms ease;';
-            btn.parentNode.insertBefore(confirm, btn.nextSibling);
-            setTimeout(function(){ confirm.style.opacity = '1'; }, 10);
-          }
-          /* Clear fields */
-          document.getElementById('mName').value = '';
-          document.getElementById('mEmail').value = '';
-          document.getElementById('mMsg').value = '';
+          var card = document.querySelector('.modal__card');
+          card.style.transition = 'opacity 300ms ease';
+          card.style.opacity = '0';
+          setTimeout(function(){
+            card.innerHTML =
+              '<button onclick="closeModal()" style="position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:99px;background:var(--surface);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-2);">✕</button>' +
+              '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:260px;gap:12px;text-align:center;padding:0 32px;">' +
+              '<div style="font-size:40px;">✉️</div>' +
+              '<p style="font-family:var(--f-head);font-size:28px;font-weight:500;letter-spacing:-0.03em;margin-top:8px;">message sent!</p>' +
+              '<p style="font-size:15px;color:var(--text-2);line-height:1.75;max-width:280px;">thanks for reaching out — i\'ll get back to you soon.</p>' +
+              '</div>';
+            card.style.opacity = '1';
+          }, 300);
         } else {
           btn.textContent = 'send message →';
           btn.disabled = false;
