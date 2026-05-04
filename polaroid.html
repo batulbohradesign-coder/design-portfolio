@@ -138,12 +138,12 @@
   /* Stage */
   .stage {
     height: 100vh;
-    overflow: hidden;
+    overflow: visible; /* allow footer outside stage to show */
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 56px 24px 80px;
-    position: relative;
+    padding: 56px 24px 48px;
     position: relative;
     z-index: 1;
   }
@@ -443,36 +443,42 @@
     .info-btn { font-size: 15px; }
     .info-popover { width: 200px; font-size: 16px; }
 
-    /* Stage fills full screen with room for CTAs at bottom */
-    .stage { padding: 56px 16px 100px; }
-
-    /* Smaller scene on mobile */
-    .scene { height: 360px; width: 100%; }
-    .camera-wrap { width: 200px; height: 185px; }
-    .camera-svg { width: 200px; }
-    .click-hint { left: -16px; top: 44px; }
-    .click-hint .hint-text { font-size: 17px; }
-
-    /* Polaroid photo stays within visible area */
-    .polaroid { width: 140px; padding: 8px 8px 32px 8px; }
-    .polaroid-photo { width: 124px; height: 124px; }
-    .polaroid.settled {
-      transform: translate(30%, -40%) rotate(6deg) scale(1);
+    /* Stage: no overflow hidden on mobile so polaroid doesn't get clipped */
+    .stage {
+      overflow: visible;
+      align-items: flex-start;
+      padding: 80px 16px 140px;
     }
 
-    /* CTAs pinned to bottom with space */
+    .scene { height: 320px; width: 100%; }
+    .camera-wrap { width: 190px; height: 176px; }
+    .camera-svg { width: 190px; }
+
+    /* Hide click hint on mobile — not needed */
+    .click-hint { display: none; }
+
+    /* Polaroid stays within scene — no offset beyond scene width */
+    .polaroid { width: 130px; padding: 8px 8px 30px 8px; }
+    .polaroid-photo { width: 114px; height: 114px; }
+    .polaroid.settled {
+      transform: translate(20%, -50%) rotate(6deg) scale(1);
+    }
+
+    /* CTAs fixed to bottom of screen — never overlap anything */
     .actions {
-      bottom: 24px;
+      position: fixed;
+      bottom: 32px;
+      left: 0; right: 0;
+      transform: none;
       flex-direction: column;
       gap: 10px;
-      width: 100%;
       padding: 0 24px;
+      width: 100%;
     }
     .action-btn { width: 100%; justify-content: center; font-size: 18px; }
 
     .stamp { font-size: 13px; }
-    .stamp svg { width: 10px; height: 10px; }
-    footer { font-size: 15px; bottom: 4px; }
+    footer { font-size: 15px; bottom: 8px; }
   }
 </style>
 </head>
@@ -602,13 +608,14 @@
     </div>
 
   </div>
+
+  <footer>made with <span>♡</span> by bb</footer>
+
 </div>
 
 <div class="flash" id="flash"></div>
 
 <video id="video" autoplay playsinline muted></video>
-
-<footer>made with <span>♡</span> by bb</footer>
 
 <script>
   // ===== STATE — two-state shutter =====
