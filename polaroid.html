@@ -395,18 +395,24 @@
   }
 
   .error-msg {
-    position: absolute;
-    bottom: -110px;
+    position: fixed;
+    bottom: 48px;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'Caveat', cursive;
     font-size: 21px;
     color: var(--accent-warm);
     text-align: center;
-    max-width: 280px;
+    max-width: 320px;
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
+    z-index: 20;
+    background: var(--paper);
+    padding: 12px 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(42,37,32,0.12);
+    white-space: nowrap;
   }
   .error-msg.visible { opacity: 1; }
   .error-msg span { display: block; font-size: 16px; color: var(--ink-faded); margin-top: 4px; }
@@ -464,10 +470,10 @@
       transform: translate(20%, -50%) rotate(6deg) scale(1);
     }
 
-    /* CTAs fixed to bottom of screen — never overlap anything */
+    /* CTAs fixed to bottom — stacked vertically, clear of footer */
     .actions {
       position: fixed;
-      bottom: 32px;
+      bottom: 48px;
       left: 0; right: 0;
       transform: none;
       flex-direction: column;
@@ -478,7 +484,7 @@
     .action-btn { width: 100%; justify-content: center; font-size: 18px; }
 
     .stamp { font-size: 13px; }
-    footer { font-size: 15px; bottom: 8px; }
+    footer { font-size: 15px; bottom: 16px; }
   }
 </style>
 </head>
