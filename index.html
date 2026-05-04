@@ -471,13 +471,45 @@
     .hero__left > *:nth-child(2) { animation-delay: 160ms; }
     .hero__left > *:nth-child(3) { animation-delay: 280ms; }
     .hero__visual { opacity: 0; animation: fadeUp 600ms var(--ease) 360ms forwards; }
+
+    /* ── FLOATING GIRAFFE COMPANION ── */
+    .giraffe-companion {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      width: 110px; /* slightly larger */
+      z-index: 50;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 400ms var(--ease), transform 400ms var(--ease);
+      pointer-events: none;
+    }
+    .giraffe-companion.visible { opacity: 1; transform: translateY(0); }
+    #companionCanvas { width: 100%; height: auto; display: block; }
+    @media (max-width: 767px) { .giraffe-companion { display: none; } }
+
+    /* ── HERO TITLE ANIMATION ── */
+    .hero__title .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(40px) rotate(4deg);
+      animation: charIn 600ms var(--ease) forwards;
+      transition: color 200ms ease, transform 200ms var(--ease);
+      cursor: default;
+    }
+    .hero__title .char:hover {
+      color: var(--char-color);
+      transform: translateY(-8px) scale(1.15);
+    }
+    @keyframes charIn {
+      to { opacity: 1; transform: translateY(0) rotate(0deg); }
+    }
   </style>
 </head>
 <body>
 
   <header class="nav">
     <div class="wrap nav__inner">
-      <a href="/" class="nav__logo">
+      <a href="#" class="nav__logo" id="logoLink">
         <span>b</span><span class="nav__logo-rest">atul.design</span><span class="nav__logo-dot">.</span>
       </a>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
@@ -498,7 +530,7 @@
     <!-- HERO -->
     <section class="wrap hero">
       <div class="hero__left">
-        <h1 class="hero__title">batul<br>bohra</h1>
+        <h1 class="hero__title" id="heroTitle">batul<br>bohra</h1>
         <p class="hero__sub">hello, i'm a designer who loves making beautiful things that <em>help people</em></p>
       </div>
       <div class="hero__visual">
@@ -709,6 +741,11 @@
 
   </main>
 
+  <!-- FLOATING GIRAFFE COMPANION -->
+  <div class="giraffe-companion" id="giraffeCompanion">
+    <canvas id="companionCanvas" width="256" height="256"></canvas>
+  </div>
+
   <!-- OVERLAY -->
   <div class="overlay" id="overlay" onclick="if(event.target===this)closeOverlay()">
     <div class="overlay__box">
@@ -890,7 +927,100 @@
       });
     })();
 
-    /* ── HAMBURGER ── */
+    /* ── LOGO CLICK — scroll to top ── */
+    document.getElementById('logoLink').addEventListener('click', function(e){
+      e.preventDefault();
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+
+    /* ── HERO TITLE CHAR ANIMATION ── */
+    (function(){
+      var title = document.getElementById('heroTitle');
+      if(!title) return;
+      var delay = 200;
+      var lines = ['batul', 'bohra'];
+      /* Colors from throughout the site */
+      var colors = ['#C85C3A','#7A9E7E','#7A8FA6','#9A7B5A','#C9D5C2','#E8D5C4','#C8D4E0','#9A6B2A','#C85C3A','#7A9E7E'];
+      var html = '';
+      var charIndex = 0;
+      lines.forEach(function(word, wi){
+        word.split('').forEach(function(ch, ci){
+          var d = delay + (wi * 5 + ci) * 60;
+          var color = colors[charIndex % colors.length];
+          html += '<span class="char" style="animation-delay:' + d + 'ms;--char-color:' + color + '">' + ch + '</span>';
+          charIndex++;
+        });
+        if(wi < lines.length - 1) html += '<br>';
+      });
+      title.innerHTML = html;
+    })();
+
+    /* ── COMPANION GIRAFFE ── */
+    (function(){
+      var companion = document.getElementById('giraffeCompanion');
+      var canvas    = document.getElementById('companionCanvas');
+      if(!canvas || !companion) return;
+      var ctx = canvas.getContext('2d');
+      var S   = 256;
+      var EYES = [
+        { fx:0.3690, fy:0.3680, fr:0.1260, pr:0.032 },
+        { fx:0.5855, fy:0.2634, fr:0.1161, pr:0.032 }
+      ];
+      var cur = [{x:0,y:0},{x:0,y:0}];
+      var tgt = [{x:0,y:0},{x:0,y:0}];
+      var loaded = false;
+
+      var img = new Image();
+      img.onload = function(){ loaded = true; };
+      img.src = 'giraffe-clean.png';
+
+      function drawCompanion(){
+        ctx.clearRect(0,0,S,S);
+        if(loaded) ctx.drawImage(img,0,0,S,S);
+        EYES.forEach(function(e,i){
+          var cx=e.fx*S, cy=e.fy*S, pr=e.pr*S;
+          var max=(e.fr*S-pr)*0.58;
+          cur[i].x+=(tgt[i].x-cur[i].x)*0.10;
+          cur[i].y+=(tgt[i].y-cur[i].y)*0.10;
+          var px=cx+cur[i].x, py=cy+cur[i].y;
+          ctx.beginPath(); ctx.arc(px,py,pr,0,Math.PI*2);
+          ctx.fillStyle='#1A1A1A'; ctx.fill();
+          ctx.beginPath(); ctx.arc(px+pr*0.35,py-pr*0.35,pr*0.25,0,Math.PI*2);
+          ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fill();
+        });
+        requestAnimationFrame(drawCompanion);
+      }
+      drawCompanion();
+
+      /* Show after scrolling past hero, hide when footer visible */
+      var hero   = document.querySelector('.hero');
+      var footer = document.querySelector('.footer');
+      window.addEventListener('scroll', function(){
+        if(!hero || !footer) return;
+        var heroBottom = hero.getBoundingClientRect().bottom;
+        var footerTop  = footer.getBoundingClientRect().top;
+        if(heroBottom < window.innerHeight * 0.3 && footerTop > window.innerHeight){
+          companion.classList.add('visible');
+        } else {
+          companion.classList.remove('visible');
+        }
+      }, {passive:true});
+
+      /* Eye tracking */
+      document.addEventListener('mousemove', function(e){
+        var r=canvas.getBoundingClientRect();
+        var mx=(e.clientX-r.left)*(S/r.width);
+        var my=(e.clientY-r.top)*(S/r.height);
+        EYES.forEach(function(eye,i){
+          var cx=eye.fx*S, cy=eye.fy*S, max=(eye.fr*S-eye.pr*S)*0.58;
+          var dx=mx-cx, dy=my-cy, d=Math.sqrt(dx*dx+dy*dy);
+          if(!d) return;
+          var a=Math.atan2(dy,dx), t=Math.min(d*0.10,max);
+          tgt[i].x=Math.cos(a)*t; tgt[i].y=Math.sin(a)*t;
+        });
+      });
+    })();
     (function(){
       var btn   = document.getElementById('hamburger');
       var links = document.getElementById('navLinks');
